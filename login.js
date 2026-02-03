@@ -20,6 +20,9 @@ class AuthSystem {
 
         // Setup event listeners
         this.setupEventListeners();
+        
+        // Handle keyboard on mobile
+        this.setupMobileKeyboard();
     }
 
     setupEventListeners() {
@@ -47,6 +50,20 @@ class AuthSystem {
                 });
             }
         });
+    }
+
+    setupMobileKeyboard() {
+        // Adjust viewport when keyboard appears on mobile
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    setTimeout(() => {
+                        document.body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
+                });
+            });
+        }
     }
 
     handleLogin() {
@@ -183,17 +200,18 @@ class AuthSystem {
                 .welcome-content {
                     text-align: center;
                     max-width: 400px;
+                    padding: 20px;
                 }
                 
                 .welcome-content i {
-                    font-size: 64px;
+                    font-size: 48px;
                     color: #10b981;
                     margin-bottom: 20px;
                     animation: bounce 1s ease infinite;
                 }
                 
                 .welcome-content h2 {
-                    font-size: 28px;
+                    font-size: 24px;
                     margin-bottom: 10px;
                     background: linear-gradient(135deg, #3b82f6, #8b5cf6);
                     -webkit-background-clip: text;
@@ -202,20 +220,20 @@ class AuthSystem {
                 
                 .welcome-content p {
                     color: #94a3b8;
-                    font-size: 18px;
+                    font-size: 16px;
                     margin-bottom: 30px;
                 }
                 
                 .loading-dots {
                     display: flex;
                     justify-content: center;
-                    gap: 10px;
-                    margin-top: 30px;
+                    gap: 8px;
+                    margin-top: 20px;
                 }
                 
                 .dot {
-                    width: 12px;
-                    height: 12px;
+                    width: 10px;
+                    height: 10px;
                     background: #3b82f6;
                     border-radius: 50%;
                     animation: pulseDots 1.4s ease-in-out infinite;
@@ -231,12 +249,26 @@ class AuthSystem {
                 
                 @keyframes bounce {
                     0%, 100% { transform: translateY(0); }
-                    50% { transform: translateY(-10px); }
+                    50% { transform: translateY(-8px); }
                 }
                 
                 @keyframes pulseDots {
                     0%, 100% { opacity: 0.4; transform: scale(0.8); }
                     50% { opacity: 1; transform: scale(1.2); }
+                }
+                
+                @media (max-width: 480px) {
+                    .welcome-content i {
+                        font-size: 40px;
+                    }
+                    
+                    .welcome-content h2 {
+                        font-size: 20px;
+                    }
+                    
+                    .welcome-content p {
+                        font-size: 14px;
+                    }
                 }
             `;
             document.head.appendChild(style);
@@ -247,20 +279,32 @@ class AuthSystem {
         const loadingScreen = document.getElementById('loading-screen');
         const loginScreen = document.getElementById('login-screen');
         const mainApp = document.getElementById('main-app');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 
         if (loadingScreen) loadingScreen.style.display = 'none';
-        if (loginScreen) loginScreen.style.display = 'flex';
+        if (loginScreen) {
+            loginScreen.style.display = 'flex';
+            loginScreen.style.opacity = '1';
+        }
         if (mainApp) mainApp.style.display = 'none';
+        if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
     }
 
     showMainApp() {
         const loadingScreen = document.getElementById('loading-screen');
         const loginScreen = document.getElementById('login-screen');
         const mainApp = document.getElementById('main-app');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 
         if (loadingScreen) loadingScreen.style.display = 'none';
         if (loginScreen) loginScreen.style.display = 'none';
-        if (mainApp) mainApp.style.display = 'flex';
+        if (mainApp) {
+            mainApp.style.display = 'flex';
+            mainApp.style.opacity = '1';
+        }
+        if (mobileMenuBtn && window.innerWidth <= 768) {
+            mobileMenuBtn.style.display = 'flex';
+        }
     }
 
     updateUserUI() {
