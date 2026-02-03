@@ -2,26 +2,38 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>CodeGuru AI - Coding Zero Se Hero</title>
     <link rel="icon" type="image/png" href="image.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Mobile Menu Button -->
+    <button id="mobile-menu-btn" class="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-overlay" class="mobile-overlay"></div>
+
     <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="loading-content">
             <div class="loading-logo">
-                <i class="fas fa-code fa-4x"></i>
+                <i class="fas fa-code"></i>
                 <h1>CodeGuru AI</h1>
             </div>
+            
             <div class="loading-progress">
                 <div class="loading-bar">
                     <div class="loading-fill"></div>
                 </div>
                 <p>Loading your coding journey...</p>
             </div>
+            
             <div class="loading-tips">
                 <p><i class="fas fa-lightbulb"></i> Tip: Type NEXT to continue lessons</p>
                 <p><i class="fas fa-lightbulb"></i> Tip: Type ASK if you're confused</p>
@@ -64,15 +76,19 @@
         </div>
     </div>
 
-    <!-- Main App Container (Hidden Initially) -->
+    <!-- Main App Container -->
     <div class="container" id="main-app" style="display: none;">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-code logo-icon"></i>
                     <h1>CodeGuru AI</h1>
+                    <button id="mobile-close-btn" class="mobile-close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
+                
                 <div class="user-info" id="user-info">
                     <div class="user-avatar">
                         <i class="fas fa-user-graduate"></i>
@@ -93,10 +109,13 @@
                     <h3><i class="fas fa-chart-line"></i> Tera Progress</h3>
                     <span id="progress-percent">0%</span>
                 </div>
+                
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
+                
                 <p id="lessons-completed">0/100 lessons completed</p>
+                
                 <div class="progress-details">
                     <div class="progress-item">
                         <span>HTML</span>
@@ -122,19 +141,23 @@
                 <h3><i class="fas fa-graduation-cap"></i> Courses</h3>
                 <ul class="course-list">
                     <li class="course-item active" data-course="html">
-                        <i class="fab fa-html5"></i> HTML Basics
+                        <i class="fab fa-html5"></i>
+                        <span class="course-item-content">HTML Basics</span>
                         <span class="lesson-count">0/25</span>
                     </li>
                     <li class="course-item" data-course="css">
-                        <i class="fab fa-css3-alt"></i> CSS Styling
+                        <i class="fab fa-css3-alt"></i>
+                        <span class="course-item-content">CSS Styling</span>
                         <span class="lesson-count">0/25</span>
                     </li>
                     <li class="course-item" data-course="javascript">
-                        <i class="fab fa-js-square"></i> JavaScript
+                        <i class="fab fa-js-square"></i>
+                        <span class="course-item-content">JavaScript</span>
                         <span class="lesson-count">0/25</span>
                     </li>
                     <li class="course-item" data-course="python">
-                        <i class="fab fa-python"></i> Python
+                        <i class="fab fa-python"></i>
+                        <span class="course-item-content">Python</span>
                         <span class="lesson-count">0/25</span>
                     </li>
                 </ul>
@@ -169,7 +192,7 @@
                         <i class="fas fa-lock"></i>
                     </div>
                     <button id="view-certificate-btn" class="view-certificate-btn" disabled>
-                        View Certificate
+                        <i class="fas fa-certificate"></i> View Certificate
                     </button>
                 </div>
             </div>
@@ -183,11 +206,15 @@
                     <h2 id="current-course">HTML Basics</h2>
                     <p id="current-lesson">Lesson 1: What is HTML?</p>
                 </div>
+                
                 <div class="header-actions">
-                    <button id="help-btn" class="header-btn" title="Help">
+                    <button id="mobile-sidebar-toggle" class="header-btn mobile-only" title="Menu">
+                        <i class="fas fa-bars"></i> Menu
+                    </button>
+                    <button id="help-btn" class="header-btn mobile-hide" title="Help">
                         <i class="fas fa-question-circle"></i> Help
                     </button>
-                    <button id="restart-btn" class="header-btn" title="Restart Course">
+                    <button id="restart-btn" class="header-btn mobile-hide" title="Restart Course">
                         <i class="fas fa-redo"></i> Restart
                     </button>
                 </div>
@@ -211,6 +238,7 @@
                         <i class="fas fa-paper-plane"></i> Send
                     </button>
                 </div>
+                
                 <div class="quick-commands">
                     <button class="quick-btn" data-command="NEXT">
                         <i class="fas fa-forward"></i> NEXT
@@ -236,11 +264,13 @@
                 <h2><i class="fas fa-question-circle"></i> Quick Quiz</h2>
                 <button class="close-modal" id="close-quiz">&times;</button>
             </div>
+            
             <div class="modal-body">
                 <div id="quiz-question"></div>
                 <div id="quiz-options"></div>
                 <div id="quiz-feedback"></div>
             </div>
+            
             <div class="modal-footer">
                 <button id="submit-quiz" class="modal-btn">
                     <i class="fas fa-check"></i> Submit Answer
@@ -256,6 +286,7 @@
                 <h2><i class="fas fa-award"></i> Certificate of Completion</h2>
                 <button class="close-modal" id="close-certificate">&times;</button>
             </div>
+            
             <div class="modal-body">
                 <div class="certificate" id="certificate-content">
                     <div class="certificate-border">
@@ -267,6 +298,7 @@
                                     <p>Coding Zero Se Hero</p>
                                 </div>
                             </div>
+                            
                             <div class="certificate-title">
                                 <h2>CERTIFICATE OF COMPLETION</h2>
                                 <p>This is to certify that</p>
@@ -280,6 +312,7 @@
                             <div class="certificate-achievement">
                                 <p>has successfully completed all requirements and demonstrated proficiency in</p>
                                 <h4>Full Stack Web Development</h4>
+                                
                                 <div class="courses-completed">
                                     <span class="course-tag">HTML</span>
                                     <span class="course-tag">CSS</span>
@@ -309,6 +342,7 @@
                                 <div class="signature-line"></div>
                                 <p>CodeGuru AI Director</p>
                             </div>
+                            
                             <div class="verification">
                                 <p>Verify at: codeguru.ai/verify/<span id="verify-id">000001</span></p>
                             </div>
@@ -316,6 +350,7 @@
                     </div>
                 </div>
             </div>
+            
             <div class="modal-footer">
                 <button id="print-certificate" class="modal-btn print-btn">
                     <i class="fas fa-print"></i> Print Certificate
@@ -331,12 +366,11 @@
     </div>
 
     <!-- JavaScript Files -->
-    <script src="html-courses.js"></script>
-    <script src="css-courses.js"></script>
-    <script src="js-courses.js"></script>
-    <script src="python-courses.js"></script>
+    <script src="courses/html-courses.js"></script>
+    <script src="courses/css-courses.js"></script>
+    <script src="courses/js-courses.js"></script>
+    <script src="courses/python-courses.js"></script>
     <script src="login.js"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
