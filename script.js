@@ -1,4 +1,4 @@
-// CodeGuru AI - Main JavaScript File
+// CodeGuru AI - Main JavaScript File with Mobile Support
 // Note: This integrates with auth system from login.js
 
 // Global Variables
@@ -11,6 +11,7 @@ let userProgress = {
     javascript: 0,
     python: 0
 };
+let isSidebarOpen = false;
 
 // DOM Elements
 const chatContainer = document.getElementById('chat-container');
@@ -34,6 +35,11 @@ const quickBtns = document.querySelectorAll('.quick-btn');
 const helpBtn = document.getElementById('help-btn');
 const restartBtn = document.getElementById('restart-btn');
 const viewCertificateBtn = document.getElementById('view-certificate-btn');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const mobileOverlay = document.getElementById('mobile-overlay');
+const mobileCloseBtn = document.getElementById('mobile-close-btn');
+const sidebar = document.getElementById('sidebar');
+const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
 
 // Progress elements
 const htmlProgress = document.getElementById('html-progress');
@@ -51,6 +57,9 @@ const courses = {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    // Check device type
+    detectDeviceType();
+    
     // Show loading screen
     showLoadingScreen();
     
@@ -61,15 +70,141 @@ document.addEventListener('DOMContentLoaded', function() {
         completedLessons = savedProgress.completedLessons;
     }
     
-    // Hide loading after 2 seconds
+    // Hide loading after 1.5 seconds
     setTimeout(() => {
         hideLoadingScreen();
         loadCourse('html', 0);
         updateProgress();
         setupEventListeners();
         updateCourseProgressUI();
-    }, 2000);
+        setupMobileFeatures();
+    }, 1500);
 });
+
+// Detect device type and adjust UI
+function detectDeviceType() {
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTablet = /iPad|Android|Tablet/i.test(navigator.userAgent) && !/Mobile/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        document.body.classList.add('mobile-device');
+        if (window.innerWidth <= 768) {
+            document.body.classList.add('mobile-view');
+        }
+    } else if (isTablet) {
+        document.body.classList.add('tablet-device');
+    } else {
+        document.body.classList.add('desktop-device');
+    }
+    
+    // Add viewport class based on width
+    updateViewportClass();
+    window.addEventListener('resize', updateViewportClass);
+}
+
+// Update viewport class
+function updateViewportClass() {
+    const width = window.innerWidth;
+    document.body.classList.remove('mobile-view', 'tablet-view', 'desktop-view');
+    
+    if (width <= 480) {
+        document.body.classList.add('mobile-view');
+    } else if (width <= 768) {
+        document.body.classList.add('tablet-view');
+    } else if (width <= 1024) {
+        document.body.classList.add('desktop-view');
+    } else {
+        document.body.classList.add('wide-desktop-view');
+    }
+}
+
+// Setup Mobile Features
+function setupMobileFeatures() {
+    // Mobile menu toggle
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleSidebar);
+    }
+    
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', closeSidebar);
+    }
+    
+    if (mobileCloseBtn) {
+        mobileCloseBtn.addEventListener('click', closeSidebar);
+    }
+    
+    if (mobileSidebarToggle) {
+        mobileSidebarToggle.addEventListener('click', toggleSidebar);
+    }
+    
+    // Close sidebar when clicking on course items (on mobile)
+    courseItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
+        });
+    });
+    
+    // Handle keyboard on mobile
+    userInput.addEventListener('focus', function() {
+        if (window.innerWidth <= 768) {
+            // Scroll input into view on mobile
+            setTimeout(() => {
+                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
+    });
+    
+    // Prevent zoom on double tap (for mobile)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(event) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+    
+    // Handle back button on mobile
+    window.addEventListener('popstate', function() {
+        if (isSidebarOpen) {
+            closeSidebar();
+        }
+    });
+}
+
+// Toggle Sidebar (Mobile)
+function toggleSidebar() {
+    if (window.innerWidth <= 768) {
+        isSidebarOpen = !isSidebarOpen;
+        sidebar.classList.toggle('active', isSidebarOpen);
+        mobileOverlay.classList.toggle('active', isSidebarOpen);
+        mobileMenuBtn.style.display = isSidebarOpen ? 'none' : 'flex';
+        
+        // Prevent body scroll when sidebar is open
+        document.body.style.overflow = isSidebarOpen ? 'hidden' : '';
+        
+        // Add to history for back button support
+        if (isSidebarOpen) {
+            history.pushState({ sidebar: 'open' }, '');
+        } else {
+            history.back();
+        }
+    }
+}
+
+// Close Sidebar (Mobile)
+function closeSidebar() {
+    if (window.innerWidth <= 768 && isSidebarOpen) {
+        isSidebarOpen = false;
+        sidebar.classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        mobileMenuBtn.style.display = 'flex';
+        document.body.style.overflow = '';
+        history.back();
+    }
+}
 
 // Loading Screen Functions
 function showLoadingScreen() {
@@ -142,6 +277,18 @@ function setupEventListeners() {
     if (restartBtn) {
         restartBtn.addEventListener('click', restartCourse);
     }
+    
+    // Close modals when clicking outside (mobile friendly)
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('active');
+        }
+    });
+    
+    // Handle orientation change
+    window.addEventListener('orientationchange', function() {
+        setTimeout(updateViewportClass, 300);
+    });
 }
 
 // Handle User Input
@@ -157,7 +304,11 @@ function handleUserInput() {
         
         // Clear input
         userInput.value = '';
-        userInput.focus();
+        
+        // Focus back on input (except on mobile where keyboard might be open)
+        if (window.innerWidth > 768) {
+            userInput.focus();
+        }
     }
 }
 
@@ -165,7 +316,9 @@ function handleUserInput() {
 function handleQuickCommand(command) {
     addMessageToChat(command, 'user');
     processCommand(command);
-    userInput.focus();
+    if (window.innerWidth > 768) {
+        userInput.focus();
+    }
 }
 
 // Process User Commands
@@ -238,8 +391,13 @@ function addMessageToChat(text, sender) {
     // Add to chat
     chatContainer.appendChild(messageDiv);
     
-    // Scroll to bottom
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    // Scroll to bottom with smooth animation
+    setTimeout(() => {
+        chatContainer.scrollTo({
+            top: chatContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+    }, 100);
 }
 
 // Format Message Text
@@ -522,6 +680,9 @@ function showQuiz() {
     
     // Show modal
     quizModal.classList.add('active');
+    
+    // On mobile, close sidebar if open
+    closeSidebar();
 }
 
 // Check Quiz Answer
@@ -687,6 +848,9 @@ function viewCertificate() {
     
     // Show modal
     certificateModal.classList.add('active');
+    
+    // On mobile, close sidebar if open
+    closeSidebar();
 }
 
 // Print Certificate
@@ -751,6 +915,12 @@ function shareCertificate() {
             title: 'My CodeGuru AI Certificate',
             text: shareText,
             url: shareUrl
+        }).catch(err => {
+            console.log('Error sharing:', err);
+            // Fallback to copying to clipboard
+            navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => {
+                alert('Certificate link copied to clipboard! Share it with your friends!');
+            });
         });
     } else {
         // Fallback to copying to clipboard
